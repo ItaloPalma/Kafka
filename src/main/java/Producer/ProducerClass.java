@@ -1,15 +1,17 @@
 package Producer;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
 public class ProducerClass {
 
     public static void main(String[] args) {
+
+        Logger logger = LoggerFactory.getLogger(ProducerClass.class);
 
         //* https://kafka.apache.org/documentation/#producerconfigs
 
@@ -27,7 +29,18 @@ public class ProducerClass {
 
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
-        producer.send(record);
+        producer.send(record, new Callback() {
+            @Override
+            public void onCompletion(RecordMetadata recordMetadata, Exception e) {
+                if(e == null){
+                    logger.info("Registrando Dados da Mensagem Enviada... \n" +
+                    "Tópico: " + recordMetadata.topic() +
+                    "\nOffset: " + recordMetadata.offset());
+                }
+                else
+                    logger.error("Uma Exception Ocorreu...", e);
+                }
+            });
         producer.flush();
         producer.close();
     }
