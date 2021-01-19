@@ -6,6 +6,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
@@ -30,9 +31,7 @@ public class ConsumerClass {
 
         String topic = "first_topic";
 
-        //* Se trocar o nome do Grupo, você acaba se conectando ao tópico novamente do começo, praticamente restarta
-        //* a aplicação
-        String groupName = "MyFirstGroup";
+        Long offsetDesejado = 1L;
 
         Properties properties = new Properties();
 
@@ -42,13 +41,17 @@ public class ConsumerClass {
 
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupName);
-
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(properties);
 
-        kafkaConsumer.subscribe(Arrays.asList(topic));
+        //*AssignAndSeek funciona como um mecanismo de restart
+        //*Crio um TopicPartition e menciono o tópico e a partição desejada
+        //*O método seek então lê os offsets a partir desse contexto parametrizado
+        TopicPartition topicPartition = new TopicPartition(topic, 0);
+        kafkaConsumer.assign(Arrays.asList(topicPartition));
+        kafkaConsumer.seek(topicPartition, offsetDesejado);
+
 
         //*Laço para testar a recepção de mensagens
         while (true){
