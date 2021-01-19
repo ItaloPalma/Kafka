@@ -43,7 +43,7 @@ public class ProducerClass {
                 if(e == null){
                     logger.info("Registrando Dados da Mensagem Enviada... \n" +
                     "Tópico: " + recordMetadata.topic() +
-                    "\nOffset: " + recordMetadata.offset() + 
+                    "\nOffset: " + recordMetadata.offset() +
                     "\nKey: " + key);
                 }
                 else
